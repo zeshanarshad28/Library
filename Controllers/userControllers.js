@@ -167,7 +167,7 @@ exports.paymentFail = catchAsync(async (req, res, next) => {
     status: "fail",
   });
 });
-// Payment fail
+// run when payment paid
 exports.makeMeMember = catchAsync(async (req, res, next) => {
   console.log("payment is  paid ! ");
   await User.findByIdAndUpdate(req.params.id, { member: true });

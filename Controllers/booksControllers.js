@@ -69,10 +69,10 @@ exports.uploadPhoto = upload.single("coverImage");
 // Re-size user photos
 exports.resizeBookPhoto = catchAsync(async (req, res, next) => {
   console.log("resize is working");
-  if (!req.file.coverImage) return next();
+  if (!req.file) return next();
 
   req.body.coverImage = `user-${req.params.id}-${Date.now()}-cover.jpeg`;
-  await sharp(req.file.coverImage[0].buffer)
+  await sharp(req.file.buffer)
     .resize(2000, 1333)
     .toFormat("jpeg")
     .jpeg({ quality: 90 })
