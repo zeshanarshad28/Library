@@ -7,6 +7,7 @@ const xssClean = require("xss-clean");
 
 const userRoutes = require("./routes/userRoutes");
 const booksRoutes = require("./routes/booksRoutes");
+const checkoutRoutes = require("./routes/checkoutRoutes");
 
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./Controllers/errorControllers");
@@ -27,6 +28,7 @@ app.use(express.json());
 // Routes
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/books", booksRoutes);
+app.use("/api/v1/checkouts", checkoutRoutes);
 
 // // Handling unhandled routes:
 app.all("*", (req, res, next) => {

@@ -53,7 +53,11 @@ router.delete(
   booksControllers.deleteSubBook
 );
 // Get Book
-router.get("/getBook", booksControllers.getBook);
+router.get("/getBook", booksControllers.getBooks);
 // Get Sub-Book
-router.get("/getSubBook", booksControllers.getSubBook);
+router.get("/getSubBook", booksControllers.getSubBooks);
+// Get Book By ID
+router.get("/getBookById/:id", booksControllers.getBookById);
+// Get Sub-Book By ID
+router.get("/getSubBookById/:id", booksControllers.getSubBookById);
 module.exports = router;

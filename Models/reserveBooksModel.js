@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 
 const reserveBooksSchema = new mongoose.Schema({
-  book: {
+  bookId: {
     type: mongoose.Schema.ObjectId,
     ref: "SubBooks",
     required: [true, "Booking must belong to a Tour!"],
   },
-  user: {
+  userId: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
     required: [true, "Booking must belong to a User!"],

@@ -1,15 +1,15 @@
 const mongoose = require("mongoose");
 
-const bookIssuanceSchema = new mongoose.Schema({
-  book: {
+const issuedBooksSchema = new mongoose.Schema({
+  bookId: {
     type: mongoose.Schema.ObjectId,
     ref: "SubBooks",
-    required: [true, "Booking must belong to a Tour!"],
+    // required: [true, "please give "],
   },
-  user: {
+  userId: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    required: [true, "Booking must belong to a User!"],
+    // required: [true, "Booking must belong to a User!"],
   },
   issuanceDate: {
     type: Date,
@@ -17,11 +17,11 @@ const bookIssuanceSchema = new mongoose.Schema({
   },
   issuanceExpirationDate: {
     type: Date,
-    default: this.issuanceDate.setDate(this.issuanceDate.getDate() + 10),
+    default: () => Date.now() + 10 * 24 * 60 * 60 * 1000,
   },
 });
 
-bookingSchema.pre(/^find/, function (next) {
+issuedBooksSchema.pre(/^find/, function (next) {
   this.populate("user").populate({
     path: "book",
     select: "title",
@@ -29,6 +29,6 @@ bookingSchema.pre(/^find/, function (next) {
   next();
 });
 
-const Issuance = mongoose.model("Issuance", bookIssuanceSchema);
+const Issuance = mongoose.model("Issuance", issuedBooksSchema);
 
 module.exports = Issuance;

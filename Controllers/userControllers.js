@@ -144,7 +144,20 @@ exports.unblockUser = catchAsync(async (req, res, next) => {
 
 // make user member
 exports.makeUserMember = catchAsync(async (req, res, next) => {
-  await User.findByIdAndUpdate(req.params.userId, { member: true });
+  await User.findByIdAndUpdate(req.params.userId, {
+    member: true,
+    role: "member",
+  });
+  res.status(200).json({
+    status: "success",
+    data: null,
+  });
+}); // Cancel membership
+exports.cancelMembership = catchAsync(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.params.userId, {
+    member: false,
+    role: "user",
+  });
   res.status(200).json({
     status: "success",
     data: null,
@@ -170,7 +183,7 @@ exports.paymentFail = catchAsync(async (req, res, next) => {
 // run when payment paid
 exports.makeMeMember = catchAsync(async (req, res, next) => {
   console.log("payment is  paid ! ");
-  await User.findByIdAndUpdate(req.params.id, { member: true });
+  await User.findByIdAndUpdate(req.params.id, { member: true, role: "member" });
   res.status(200).json({
     status: "fail",
   });

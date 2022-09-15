@@ -96,25 +96,28 @@ exports.deleteBook = catchAsync(async (req, res, next) => {
 // delete Sub Book
 exports.deleteSubBook = handlersFactory.deleteOne(SubBooks);
 //  Get main book
-exports.getBook = catchAsync(async (req, res, next) => {
-  const features = new ApiFeatures(Books.find(), req.query)
-    .filter()
-    .limitFields()
-    .paginate();
+exports.getBooks = handlersFactory.getAll(Books);
 
-  // const doc = await features.query.explain(); // here explain method is just to check indexing
-  const doc = await features.query;
+// Get Sub-Book
+exports.getSubBooks = handlersFactory.getAll(SubBooks);
+//  Get main book By ID
+exports.getBookById = catchAsync(async (req, res, next) => {
+  let Book = await Books.findOne({ _id: req.params.id }).populate({
+    path: "Sub_Books",
+    select: "-__v ",
+  });
+
   res.json({
     status: "Success",
-    results: doc.length,
+
     data: {
-      data: doc,
+      Book,
     },
   });
 });
 
-// Get Sub-Book
-exports.getSubBook = handlersFactory.getAll(SubBooks);
+// Get Sub-Book BY ID
+exports.getSubBookById = handlersFactory.getOne(SubBooks);
 
 // ===============================================
 // Image upload options using multer

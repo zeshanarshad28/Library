@@ -49,9 +49,17 @@ router.patch(
 router.patch(
   "/makeUserMember/:userId",
   authControllers.protect,
-  //   authControllers.restrictTo("admin"),
+  authControllers.restrictTo("admin", "librarian"),
   userControllers.makeUserMember
-); // make user librarian
+);
+// Cancel Membership
+router.patch(
+  "/cancelMembership/:userId",
+  authControllers.protect,
+  authControllers.restrictTo("admin", "librarian"),
+  userControllers.cancelMembership
+);
+// make user librarian
 router.patch(
   "/makeUserLibrarian/:userId",
   authControllers.protect,
