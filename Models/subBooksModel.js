@@ -43,5 +43,12 @@ subBooksSchema.pre("save", async function (next) {
   // console.log(this.bookDetails);
   next();
 });
+subBooksSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "bookDetails",
+    select: "-__v -createdAt -updatedAt", // excluding some fields
+  });
+  next();
+});
 const SubBooks = mongoose.model("SubBooks", subBooksSchema);
 module.exports = SubBooks;

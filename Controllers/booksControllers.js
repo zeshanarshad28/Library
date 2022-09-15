@@ -3,11 +3,13 @@ const SubBooks = require("../models/subBooksModel");
 const catchAsync = require("../utils/catchAsync");
 const AppErr = require("../utils/appError");
 const handlersFactory = require("./handlersFactory");
+const ApiFeatures = require("../Utils/apiFeatures");
 const multer = require("multer");
 const sharp = require("sharp");
-
+const { findById } = require("../models/userModel");
+const { findByIdAndUpdate } = require("../models/booksModel");
+// add new book ( main +  its sub books)
 exports.addNewBook = catchAsync(async (req, res, next) => {
-  //   deleteData();
   const newBook = await Books.create(req.body);
   const n = req.body.totalBooks;
   const bookDetails = newBook._id;
@@ -27,6 +29,7 @@ exports.addNewBook = catchAsync(async (req, res, next) => {
     newBook,
   });
 });
+// add sub book
 exports.addNewsubBook = catchAsync(async (req, res, next) => {
   const mainBook = await Books.findOne(req.query);
   console.log(`main book: ${mainBook}`);
@@ -44,6 +47,75 @@ exports.addNewsubBook = catchAsync(async (req, res, next) => {
     subBook,
   });
 });
+// update main Book
+exports.updateBook = catchAsync(async (req, res, next) => {
+  const updatedBook = await Books.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(201).json({
+    status: "success",
+    updatedBook,
+  });
+});
+// update Sub Book
+exports.updateSubBook = catchAsync(async (req, res, next) => {
+  const updatedBook = await SubBooks.findByIdAndUpdate(
+    req.params.id,
+    {
+      publicationDate: req.body.publicationDate,
+      coverImage: req.body.coverImage,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  res.status(201).json({
+    status: "success",
+    updatedBook,
+  });
+});
+
+// delete book
+exports.deleteBook = catchAsync(async (req, res, next) => {
+  // first delete all sub books belongs to it
+  const a = await SubBooks.deleteMany({ bookDetails: req.params.id });
+  console.log(a);
+  const doc = await Books.findOneAndDelete({ _id: req.params.id });
+  if (!doc) {
+    return next(new AppErr("No document find with that Id", 404));
+  }
+
+  res.status(204).json({
+    status: "Sucess",
+    data: null,
+  });
+});
+// delete Sub Book
+exports.deleteSubBook = handlersFactory.deleteOne(SubBooks);
+//  Get main book
+exports.getBook = catchAsync(async (req, res, next) => {
+  const features = new ApiFeatures(Books.find(), req.query)
+    .filter()
+    .limitFields()
+    .paginate();
+
+  // const doc = await features.query.explain(); // here explain method is just to check indexing
+  const doc = await features.query;
+  res.json({
+    status: "Success",
+    results: doc.length,
+    data: {
+      data: doc,
+    },
+  });
+});
+
+// Get Sub-Book
+exports.getSubBook = handlersFactory.getAll(SubBooks);
+
 // ===============================================
 // Image upload options using multer
 
@@ -71,7 +143,7 @@ exports.resizeBookPhoto = catchAsync(async (req, res, next) => {
   console.log("resize is working");
   if (!req.file) return next();
 
-  req.body.coverImage = `user-${req.params.id}-${Date.now()}-cover.jpeg`;
+  req.body.coverImage = `book-${req.user.id}-${Date.now()}-cover.jpeg`;
   await sharp(req.file.buffer)
     .resize(2000, 1333)
     .toFormat("jpeg")
@@ -82,7 +154,7 @@ exports.resizeBookPhoto = catchAsync(async (req, res, next) => {
 // delete whole collection
 const deleteData = async () => {
   try {
-    await SubBooks.deleteMany();
+    await Books.deleteMany();
 
     console.log("Data successfully deleted!");
   } catch (err) {
@@ -90,3 +162,5 @@ const deleteData = async () => {
   }
   process.exit();
 };
+
+// const a = deleteData();

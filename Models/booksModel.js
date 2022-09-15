@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-
+const SubBooks = require("./subBooksModel");
 const booksSchema = new mongoose.Schema(
   {
     title: {
@@ -45,5 +45,19 @@ const booksSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+// Virtual populate to include all sub books of specific book
+booksSchema.virtual("Sub_Books", {
+  ref: "SubBooks", // refernce schema name
+  foreignField: "bookDetails",
+  localField: "_id",
+});
+
+// booksSchema.pre(/^find/, function (next) {
+//   this.populate({
+//     path: "bookDetails",
+//     select: "-__v -createdAt -updatedAt", // excluding some fields
+//   });
+//   next();
+// });
 const Books = mongoose.model("Books", booksSchema);
 module.exports = Books;
