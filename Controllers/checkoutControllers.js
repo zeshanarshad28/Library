@@ -96,16 +96,17 @@ exports.userWhoTookBook = catchAsync(async (req, res, next) => {
 exports.allBooksTakenByMember = catchAsync(async (req, res, next) => {
   //   req.query = req.params.userId;
   console.log(req.params.userId);
-  const a = await IssuedBooks.aggregate([
+  const a = await User.aggregate([
     {
+      //   $match: { _id: { $eq: req.params.userId } },
       $match: {},
     },
     {
       $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "users",
+        from: "issuances",
+        localField: "_id",
+        foreignField: "userId",
+        as: "books",
       },
     },
   ]);
@@ -121,13 +122,16 @@ exports.allBooksTakenByMember = catchAsync(async (req, res, next) => {
 exports.returnBook = catchAsync(async (req, res, next) => {
   console.log("In return  ");
 
-  const { userId } = await IssuedBooks.findOne({ bookId: req.params.bookId });
-  const userInfo = await User.findById(req.user.id);
+  const issuanceDetails = await IssuedBooks.findOne({
+    bookId: req.params.bookId,
+  });
+  const userInfo = await User.findById(issuanceDetails.userId);
   const i = userInfo.totalBooksIssued;
-  console.log(`iiiiiiiiiiiiiiii${i}`);
-  await User.findByIdAndUpdate(req.params.bookId, {
+  //   console.log(`iiiiiiiiiiiiiiii${i}`);
+  const updatedUser = await User.findByIdAndUpdate(issuanceDetails.userId, {
     totalBooksIssued: i - 1,
   });
+  //   console.log(updatedUser);
   const a = await SubBooks.findOneAndUpdate(req.params.bookId, {
     issued: false,
   });

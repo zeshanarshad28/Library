@@ -44,6 +44,7 @@ const userSchema = new mongoose.Schema(
     totalBooksIssued: {
       type: Number,
       default: 0,
+      max: [5, "Book issuance limit exceeded"],
     },
     passwordChangedAt: Date,
     passwordResetToken: String,

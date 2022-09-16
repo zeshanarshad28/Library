@@ -35,7 +35,7 @@ router.get(
   checkoutControllers.allBooksTakenByMember
 );
 // Return a book
-router.post(
+router.patch(
   "/returnBook/:bookId",
   authControllers.protect,
   authControllers.restrictTo("member", "librarian"),
