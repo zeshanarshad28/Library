@@ -18,12 +18,12 @@ const reserveBooksSchema = new mongoose.Schema({
   },
 });
 
-bookingSchema.pre(/^find/, function (next) {
-  this.populate("User").populate({
-    path: "SubBooks",
-  });
-  next();
-});
+// bookingSchema.pre(/^find/, function (next) {
+//   this.populate("User").populate({
+//     path: "SubBooks",
+//   });
+//   next();
+// });
 
 const ReserveBooks = mongoose.model("ReserveBooks", reserveBooksSchema);
 

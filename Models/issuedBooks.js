@@ -17,17 +17,17 @@ const issuedBooksSchema = new mongoose.Schema({
   },
   issuanceExpirationDate: {
     type: Date,
-    default: () => Date.now() + 10 * 24 * 60 * 60 * 1000,
+    default: Date.now() + 10 * 24 * 60 * 60 * 1000,
   },
 });
 
-issuedBooksSchema.pre(/^find/, function (next) {
-  this.populate("user").populate({
-    path: "book",
-    select: "title",
-  });
-  next();
-});
+// issuedBooksSchema.pre(/^find/, function (next) {
+//   this.populate("user").populate({
+//     path: "book",
+//     select: "title",
+//   });
+//   next();
+// });
 
 const Issuance = mongoose.model("Issuance", issuedBooksSchema);
 

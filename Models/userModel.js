@@ -37,6 +37,14 @@ const userSchema = new mongoose.Schema(
         message: "Passwords not matched",
       },
     },
+    fine: {
+      type: Number,
+      default: 0,
+    },
+    totalBooksIssued: {
+      type: Number,
+      default: 0,
+    },
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
