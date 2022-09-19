@@ -5,6 +5,7 @@ const userControllers = require("../Controllers/userControllers");
 const authControllers = require("../Controllers/authControllers");
 const booksControllers = require("../Controllers/booksControllers");
 const checkoutControllers = require("../Controllers/checkoutControllers");
+const fineControllers = require("../Controllers/fineControllers");
 
 //  issue a book
 router.post(
@@ -41,5 +42,8 @@ router.patch(
   authControllers.restrictTo("member", "librarian"),
   checkoutControllers.returnBook
 );
-
+// Update Fine
+router.patch("/updateFine", fineControllers.payFine);
+// Pay fine
+router.get("/payFine", authControllers.protect, fineControllers.payFine);
 module.exports = router;

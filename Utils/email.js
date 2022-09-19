@@ -8,6 +8,7 @@ module.exports = class Email {
     this.url = url;
     this.from = `Zeeshan Arshad <${process.env.EMAIL_FROM}>`;
   }
+
   newTransport() {
     if (process.env.NODE_ENV === "production") {
       // Send Grid
@@ -51,6 +52,13 @@ module.exports = class Email {
   }
   async sendWelcome() {
     await this.send("Welcome", "Welcome to Magnus Mage");
+  }
+
+  async sendNotification() {
+    await this.send(
+      "Book is available",
+      "Your reserved book is available to issue"
+    );
   }
   async sendPasswordReset() {
     await this.send(

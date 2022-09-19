@@ -1,4 +1,5 @@
 const Books = require("../models/booksModel");
+const mongoose = require("mongoose");
 const SubBooks = require("../models/subBooksModel");
 const catchAsync = require("../utils/catchAsync");
 const AppErr = require("../utils/appError");
@@ -6,6 +7,7 @@ const handlersFactory = require("./handlersFactory");
 const User = require("../models/userModel");
 const IssuedBooks = require("../models/issuedBooks");
 const ReservedBooks = require("../models/reserveBooksModel");
+const Email = require("../utils/email");
 
 exports.checkoutBook = catchAsync(async (req, res, next) => {
   console.log("in checkout ");
@@ -58,12 +60,20 @@ exports.reserveBook = catchAsync(async (req, res, next) => {
   console.log("In reserve  ");
   const details = await SubBooks.findOne({ _id: req.params.bookId });
   console.log(`Book is:::::::::: ${details}`);
-  if (details.reserved == true) {
-    next(
-      new AppErr(
-        "This book is already reserved by someone ! Please try another one "
-      )
-    );
+  if (details.reserved == true || details.issued == false) {
+    if (details.reserved == true) {
+      next(
+        new AppErr(
+          "This book is already reserved by someone ! Please try another one "
+        )
+      );
+    } else {
+      next(
+        new AppErr(
+          "This book is available to issue ! You cannot reserve it Please issue it . "
+        )
+      );
+    }
   }
   const newReserved = await ReservedBooks.create({
     bookId: req.params.bookId,
@@ -95,18 +105,39 @@ exports.userWhoTookBook = catchAsync(async (req, res, next) => {
 // All books taken by a specific member
 exports.allBooksTakenByMember = catchAsync(async (req, res, next) => {
   //   req.query = req.params.userId;
-  console.log(req.params.userId);
+  const userId = req.params.userId;
   const a = await User.aggregate([
     {
       //   $match: { _id: { $eq: req.params.userId } },
-      $match: {},
+      $match: {
+        $expr: {
+          $and: [
+            {
+              $eq: ["$_id", mongoose.Types.ObjectId(userId)],
+            },
+          ],
+        },
+      },
     },
+
     {
       $lookup: {
         from: "issuances",
         localField: "_id",
         foreignField: "userId",
         as: "books",
+      },
+    },
+    {
+      $project: {
+        v: 0,
+        password: 0,
+        active: 0,
+        blocked: 0,
+        member: 0,
+
+        "books.__v": 0,
+        "books.userId": 0,
       },
     },
   ]);
@@ -125,8 +156,10 @@ exports.returnBook = catchAsync(async (req, res, next) => {
   const issuanceDetails = await IssuedBooks.findOne({
     bookId: req.params.bookId,
   });
-  const userInfo = await User.findById(issuanceDetails.userId);
-  const i = userInfo.totalBooksIssued;
+  const user = await User.findById(issuanceDetails.userId);
+  const i = user.totalBooksIssued;
+  req.user.name = user.name;
+  req.user.email = user.email;
   //   console.log(`iiiiiiiiiiiiiiii${i}`);
   const updatedUser = await User.findByIdAndUpdate(issuanceDetails.userId, {
     totalBooksIssued: i - 1,
@@ -136,6 +169,7 @@ exports.returnBook = catchAsync(async (req, res, next) => {
     issued: false,
   });
   const b = await IssuedBooks.deleteOne({ bookId: req.params.bookId });
+  await new Email(user).sendNotification();
   res.status(201).json({
     status: "sucess",
   });

@@ -4,6 +4,7 @@ const router = express.Router();
 const userControllers = require("../Controllers/userControllers");
 const authControllers = require("../Controllers/authControllers");
 const userMembershipControllers = require("../Controllers/userMembershipControllers");
+const fineControllers = require("../Controllers/fineControllers");
 
 // Auth routes
 router.post("/signup", authControllers.signup);
@@ -80,5 +81,12 @@ router.get("/makeMeMember/:id", userControllers.makeMeMember);
 router.use(authControllers.protect);
 router.use(authControllers.restrictTo("admin")); // This midlware will only allow admin to use below all routes.
 router.get("/getAllUsers", userControllers.getAllUsers);
+// buy membership
+router.get(
+  "/payFine",
+  authControllers.protect,
+  authControllers.protect,
+  fineControllers.payFine
+);
 
 module.exports = router;
