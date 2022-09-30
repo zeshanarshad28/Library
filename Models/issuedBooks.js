@@ -19,6 +19,10 @@ const issuedBooksSchema = new mongoose.Schema({
     type: Date,
     default: Date.now() + 10 * 24 * 60 * 60 * 1000,
   },
+  notificationMailSent: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // issuedBooksSchema.pre(/^find/, function (next) {

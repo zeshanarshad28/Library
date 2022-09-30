@@ -21,7 +21,7 @@ const subBooksSchema = new mongoose.Schema(
     },
     publicationDate: {
       type: Date,
-      require: [true, "Please enter publication date of this book"],
+      required: [true, "Please enter publication date of this book"],
     },
     reserved: {
       type: Boolean,
@@ -35,14 +35,14 @@ const subBooksSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-subBooksSchema.pre("save", async function (next) {
-  console.log("in pre save ...");
+// subBooksSchema.pre("save", async function (next) {
+//   console.log("in pre save ...");
 
-  this.bookDetails = await Books.findById(this.bookDetails);
+//   this.bookDetails = await Books.findById(this.bookDetails);
 
-  // console.log(this.bookDetails);
-  next();
-});
+//   // console.log(this.bookDetails);
+//   next();
+// });
 subBooksSchema.pre(/^find/, function (next) {
   this.populate({
     path: "bookDetails",

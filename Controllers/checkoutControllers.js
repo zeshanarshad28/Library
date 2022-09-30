@@ -8,6 +8,7 @@ const User = require("../models/userModel");
 const IssuedBooks = require("../models/issuedBooks");
 const ReservedBooks = require("../models/reserveBooksModel");
 const Email = require("../utils/email");
+const { json } = require("body-parser");
 
 exports.checkoutBook = catchAsync(async (req, res, next) => {
   console.log("in checkout ");
@@ -157,12 +158,21 @@ exports.returnBook = catchAsync(async (req, res, next) => {
     bookId: req.params.bookId,
   });
   const user = await User.findById(issuanceDetails.userId);
-  const i = user.totalBooksIssued;
+  const alreadyIssuedBooks = user.totalBooksIssued;
   req.user.name = user.name;
   req.user.email = user.email;
+  const differenceInDates =
+    Date.now().getTime() - issuanceDetails.issuanceExpirationDate.getTime();
+  const totalLateDays = (differenceInDates / 1000) * 3600 * 24;
+  const totalFine = process.env.FINE_PER_DAY * totalLateDays;
+  if (totalLateDays > 0) {
+    const assignFine = await User.findByIdAndUpdate(issuanceDetails.userId, {
+      fine: user.fine + totalFine,
+    });
+  }
   //   console.log(`iiiiiiiiiiiiiiii${i}`);
   const updatedUser = await User.findByIdAndUpdate(issuanceDetails.userId, {
-    totalBooksIssued: i - 1,
+    totalBooksIssued: alreadyIssuedBooks - 1,
   });
   //   console.log(updatedUser);
   const a = await SubBooks.findOneAndUpdate(req.params.bookId, {
@@ -174,3 +184,68 @@ exports.returnBook = catchAsync(async (req, res, next) => {
     status: "sucess",
   });
 });
+
+// to send late mail
+// exports = async function sendLateMail() {
+exports.sendLateMail = async (req, res) => {
+  try {
+    const toMail = await IssuedBooks.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          let: { returnDate: "$issuanceExpirationDate", userId: "$userId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $lte: ["$$returnDate", new Date(Date.now())] },
+                    {
+                      $eq: ["$_id", "$$userId"],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+
+          as: "UserDetails",
+        },
+      },
+      {
+        $unwind: "$UserDetails",
+      },
+    ]);
+
+    let emails = toMail.map(function (doc) {
+      return doc.UserDetails.email;
+    });
+
+    console.log(emails);
+
+    const loop = emails.length;
+    // console.log(loop);
+    for (let a = 0; a < loop; a++) {
+      if (toMail[a].notificationMailSent == false) {
+        console.log("sending mail");
+        let user = { email: emails[a] };
+        await new Email(user).sendIssuanceExpiration();
+        await IssuedBooks.findByIdAndUpdate(toMail[a]._id, {
+          notificationMailSent: true,
+        });
+        console.log(`mail sent to ${user}`);
+      }
+    }
+
+    res.status(200).json({
+      status: "Success",
+      toMail,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      status: "fail",
+      error,
+    });
+  }
+};

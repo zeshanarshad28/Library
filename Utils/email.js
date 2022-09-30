@@ -4,7 +4,9 @@ const pug = require("pug");
 module.exports = class Email {
   constructor(user, url) {
     this.to = user.email;
-    this.firstName = user.name.split(" ")[0];
+    // this.firstName = user.name.split(" ")[0];
+    this.firstName = user.name;
+
     this.url = url;
     this.from = `Zeeshan Arshad <${process.env.EMAIL_FROM}>`;
   }
@@ -52,6 +54,12 @@ module.exports = class Email {
   }
   async sendWelcome() {
     await this.send("Welcome", "Welcome to Magnus Mage");
+  }
+  async sendIssuanceExpiration() {
+    await this.send(
+      "Reminder ! ",
+      "your book issuance is expired please return the book as soon as possible"
+    );
   }
 
   async sendNotification() {

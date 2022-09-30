@@ -46,4 +46,11 @@ router.patch(
 router.patch("/updateFine", fineControllers.payFine);
 // Pay fine
 router.get("/payFine", authControllers.protect, fineControllers.payFine);
+
+// // Send mail on issuance expiration come
+// router.patch(
+//   "/sendLateMail",
+
+//   checkoutControllers.sendLateMail
+// );
 module.exports = router;
