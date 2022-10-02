@@ -131,7 +131,7 @@ userSchema.pre("save", function (next) {
 
 // Middleware to only get active=true users
 userSchema.pre(/^find/, function (next) {
-  // here "this" points to the current property
+  // here "this" points to the current property`
   this.find({ active: true });
   next();
 });

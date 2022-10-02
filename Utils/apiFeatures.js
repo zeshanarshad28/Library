@@ -46,12 +46,8 @@ class ApiFeatures {
       const limit = this.queryString.limit * 1 || 10;
       const page = this.queryString.page * 1 || 1;
       const skip = (page - 1) * limit;
-      // const numTours = await Tour.countDocuments();
-      // if (skip >= numTours) {
-      //   throw new Error("This page does not exist");
-      // } else {
+
       this.query = this.query.skip(skip).limit(limit);
-      // }
     }
     return this;
   }
