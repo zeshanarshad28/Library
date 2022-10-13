@@ -229,7 +229,12 @@ exports.sendLateMail = async (req, res) => {
       if (toMail[a].notificationMailSent == false) {
         console.log("sending mail");
         let user = { email: emails[a] };
-        await new Email(user).sendIssuanceExpiration();
+        try {
+          await new Email(user).sendIssuanceExpiration();
+        } catch (error) {
+          console.log(error);
+        }
+
         await IssuedBooks.findByIdAndUpdate(toMail[a]._id, {
           notificationMailSent: true,
         });

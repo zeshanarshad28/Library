@@ -6,12 +6,11 @@ const subBooksSchema = new mongoose.Schema(
       type: Number,
       unique: true,
     },
-    bookDetails: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: "Books",
-      },
-    ],
+    bookDetails: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Books",
+    },
+
     coverImage: {
       type: String,
       default: "default.jpg",

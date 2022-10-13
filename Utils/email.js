@@ -35,7 +35,7 @@ module.exports = class Email {
       },
     });
   }
-  async send(template, subject) {
+  async send(subject, template) {
     // console.log(this.from);
     // console.log(this.to);
     // console.log(process.env.EMAIL_USERNAME);
@@ -45,8 +45,9 @@ module.exports = class Email {
     const mailOptions = {
       from: this.from,
       to: this.to,
-      subject,
-      text: "Thanks!",
+      // to: "zee123@mailsac.com",
+      subject: subject,
+      text: template,
     };
     // 3)Creat a transport and send email
 

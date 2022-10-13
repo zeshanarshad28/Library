@@ -24,10 +24,10 @@ const sendErrorProd = (err, res) => {
   // operational trusted error
   if (err.isOperational) {
     res.status(err.statusCode).json({
-      status: err.status,
-      error: err,
+      // status: err.status,
+      // error: err,
       message: err.message,
-      stack: err.stack,
+      // stack: err.stack,
     });
   } else {
     // log error
@@ -42,15 +42,16 @@ const sendErrorProd = (err, res) => {
 
 module.exports = (err, req, res, next) => {
   // console.log("error handler .....");
-  console.log();
+  console.log(`.......${process.env.NODE_ENV}`);
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "Error";
 
   if (process.env.NODE_ENV === "development") {
     // console.log("Dev error");
+    console.log("in devvv");
     console.log(err);
     res.status(err.statusCode).json({
-      status: err.status,
+      // status: err.status,
       message: err.message,
     });
   } else if (process.env.NODE_ENV === "production") {

@@ -6,8 +6,10 @@ const handlersFactory = require("./handlersFactory");
 const ApiFeatures = require("../Utils/apiFeatures");
 const multer = require("multer");
 const sharp = require("sharp");
+const mongoose = require("mongoose");
 const { findById } = require("../models/userModel");
 const { findByIdAndUpdate } = require("../models/booksModel");
+const { pipeline } = require("nodemailer/lib/xoauth2");
 // add new book ( main +  its sub books)
 exports.addNewBook = catchAsync(async (req, res, next) => {
   const newBook = await Books.create(req.body);
@@ -33,6 +35,10 @@ exports.addNewBook = catchAsync(async (req, res, next) => {
 exports.addNewsubBook = catchAsync(async (req, res, next) => {
   const mainBook = await Books.findOne(req.query);
   console.log(`main book: ${mainBook}`);
+  if (!mainBook) {
+    console.log(",,,,,,,");
+    next(new AppErr("Main book against this id not exist", 404));
+  }
   const id = mainBook._id;
   const subBook = await SubBooks.create({
     bookDetails: id,
@@ -95,21 +101,106 @@ exports.deleteBook = catchAsync(async (req, res, next) => {
 });
 // delete Sub Book
 exports.deleteSubBook = handlersFactory.deleteOne(SubBooks);
-//  Get main book
-exports.getBooks = handlersFactory.getAll(Books);
+//  Get main books with sub books
+exports.getBooks = catchAsync(async (req, res, next) => {
+  const allBooks = await Books.aggregate([
+    {
+      $lookup: {
+        from: "subbooks",
+        let: { mainBookId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$bookDetails", "$$mainBookId"],
+              },
+            },
+          },
+        ],
+        as: "subBooks",
+      },
+    },
+    {
+      $project: {
+        __v: 0,
+        "subBooks.__v": 0,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      allBooks,
+    },
+  });
+});
 
 // Get Sub-Book
-exports.getSubBooks = handlersFactory.getAll(SubBooks);
+exports.getSubBooks = catchAsync(async (req, res, next) => {
+  const allSubBooks = await SubBooks.aggregate([
+    {
+      $lookup: {
+        from: "books",
+        let: { mainBookId: "$bookDetails" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$_id", "$$mainBookId"],
+              },
+            },
+          },
+        ],
+        as: "detail",
+      },
+    },
+    {
+      $project: {
+        __v: 0,
+      },
+    },
+  ]);
+  res.status(200).json({
+    status: "success",
+    data: {
+      allSubBooks,
+    },
+  });
+});
 //  Get main book By ID
 exports.getBookById = catchAsync(async (req, res, next) => {
-  let Book = await Books.findOne({ _id: req.params.id }).populate({
-    path: "Sub_Books",
-    select: "-__v ",
-  });
+  console.log(req.params.id);
+  const Book = await Books.aggregate([
+    {
+      $match: { _id: mongoose.Types.ObjectId(req.params.id) },
+    },
+    {
+      $lookup: {
+        from: "subbooks",
+        let: { mainBookId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$bookDetails", "$$mainBookId"],
+              },
+            },
+          },
+        ],
+        as: "subBooks",
+      },
+    },
+    {
+      $project: {
+        __v: 0,
+        "subBooks.__v": 0,
+      },
+    },
+  ]);
 
-  res.json({
-    status: "Success",
-
+  res.status(200).json({
+    status: "success",
     data: {
       Book,
     },
@@ -117,7 +208,40 @@ exports.getBookById = catchAsync(async (req, res, next) => {
 });
 
 // Get Sub-Book BY ID
-exports.getSubBookById = handlersFactory.getOne(SubBooks);
+exports.getSubBookById = catchAsync(async (req, res, next) => {
+  const SubBook = await SubBooks.aggregate([
+    {
+      $match: { _id: mongoose.Types.ObjectId(req.params.id) },
+    },
+    {
+      $lookup: {
+        from: "books",
+        let: { mainBookId: "$bookDetails" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$_id", "$$mainBookId"],
+              },
+            },
+          },
+        ],
+        as: "detail",
+      },
+    },
+    {
+      $project: {
+        __v: 0,
+      },
+    },
+  ]);
+  res.status(200).json({
+    status: "success",
+    data: {
+      SubBook,
+    },
+  });
+});
 
 // ===============================================
 // Image upload options using multer
@@ -154,16 +278,16 @@ exports.resizeBookPhoto = catchAsync(async (req, res, next) => {
     .toFile(`public/img/books/${req.body.coverImage}`);
   next();
 });
-// delete whole collection
-const deleteData = async () => {
-  try {
-    await Books.deleteMany();
+// delete whole collection.= just to clear collection quickly
+// const deleteData = async () => {
+//   try {
+//     await Books.deleteMany();
 
-    console.log("Data successfully deleted!");
-  } catch (err) {
-    console.log(err);
-  }
-  process.exit();
-};
+//     console.log("Data successfully deleted!");
+//   } catch (err) {
+//     console.log(err);
+//   }
+//   process.exit();
+// };
 
 // const a = deleteData();

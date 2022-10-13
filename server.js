@@ -60,35 +60,36 @@ const server = app.listen(port, () => {
 //     },
 //   ]);
 
-// let emails = toMail.map(function (doc) {
-//   return doc.UserDetails.email;
-// });
+//   let emails = toMail.map(function (doc) {
+//     return doc.UserDetails.email;
+//   });
 
-// console.log(emails);
+//   console.log(emails);
 
-// const loop = emails.length;
-// // console.log(loop);
-// for (let a = 0; a < loop; a++) {
-//   if (toMail[a].notificationMailSent == false) {
-//     console.log("sending mail");
-//     let user = { email: emails[a] };
-//     await new Email(user).sendIssuanceExpiration();
-//     await Issuance.findByIdAndUpdate(toMail[a]._id, {
-//       notificationMailSent: true,
-//     });
-//     console.log(`mail sent to ${user}`);
+//   const loop = emails.length;
+//   // console.log(loop);
+//   for (let a = 0; a < loop; a++) {
+//     if (toMail[a].notificationMailSent == false) {
+//       console.log("sending mail");
+//       let user = { email: emails[a] };
+//       await new Email(user).sendIssuanceExpiration();
+//       await Issuance.findByIdAndUpdate(toMail[a]._id, {
+//         notificationMailSent: true,
+//       });
+//       console.log(`mail sent to ${user}`);
+//     }
 //   }
-// }
 
-// res.status(200).json({
-//   status: "Success",
-//   toMail,
+//   res.status(200).json({
+//     status: "Success",
+//     toMail,
+//   });
 // });
-// } catch (error) {
+// .catch((error) => {
 //   console.log(error);
 //   res.status(400).json({
 //     status: "fail",
 //     error,
 //   });
-// }
+// });
 // });

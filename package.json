@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "set NODE_ENV=development && nodemon server.js",
+    "start": "set NODE_ENV=development&& nodemon server.js",
     "start:prod": "cross-env NODE_ENV=production nodemon server.js",
     "debug": "ndb server.js"
   },
@@ -31,6 +31,7 @@
     "pug": "^3.0.2",
     "sharp": "^0.30.7",
     "stripe": "^10.8.0",
+    "twilio": "^3.82.1",
     "utils": "^0.3.1",
     "validator": "^13.7.0",
     "xss-clean": "^0.1.1"

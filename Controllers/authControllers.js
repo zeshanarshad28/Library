@@ -37,7 +37,9 @@ exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
-    password: req.body.confirmPassword,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+
     passwordChangedAt: req.body.passwordChangedAt,
   });
   const url = `${req.protocol}://${req.get("host")}/me`;

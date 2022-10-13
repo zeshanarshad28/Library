@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
+const AppErr = require("../Utils/appError");
 
 const userSchema = new mongoose.Schema(
   {
@@ -24,7 +25,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "must enter password"],
-      minlength: 8,
+      // minlength: 8,
       select: false,
     },
     confirmPassword: {
@@ -84,6 +85,17 @@ const userSchema = new mongoose.Schema(
 userSchema.pre("save", async function (next) {
   //only run this function if password id actually modified
   if (!this.isModified("password")) return next();
+  // password validation using Regex
+  // var passwordPattern = /^[A-Za-z]\w{7,14}$/;
+  var passwordPattern =
+    /^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[a-zA-Z!#$%&? "])[a-zA-Z0-9!#$%&?]{8,16}$/;
+  if (!this.password.match(passwordPattern)) {
+    next(
+      new AppErr(
+        "Password is invalid! it should be atleast 8 characters,start with character and contains symbols."
+      )
+    );
+  }
   // Hash the password with cost
   this.password = await bcrypt.hash(this.password, 12);
   // remove(stop) the confirmPassword to store in db. require means necessary to input not to save in db.

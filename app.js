@@ -21,7 +21,7 @@ const app = express();
 // //  Set Security HTTP Headers======
 // app.use(helmet());
 
-// app.use(bodyParser.json());
+app.use(bodyParser.json());
 app.use(morgan("dev"));
 
 app.use(express.json());
